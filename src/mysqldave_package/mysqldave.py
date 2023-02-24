@@ -38,11 +38,11 @@ class dbconnection_details:
 
 		except:
 			#saved connection details not found. using defaults
-			self.DB_USERNAME='postgres' 
+			self.DB_USERNAME='no db user' 
 			self.DB_HOST='localhost' 
-			self.DB_PORT='1532' 
-			self.DB_NAME='postgres' 
-			self.DB_SCHEMA='public'		
+			self.DB_PORT='3306' 
+			self.DB_NAME='no-db-name-given' 
+			self.DB_SCHEMA=''		
 
 		try:
 			f = open('.pwd','r')
@@ -60,7 +60,7 @@ class dbconnection_details:
 	def dbconnectionstr(self):
 		return 'usr=' + self.DB_USERNAME + '; svr=' + self.DB_HOST + '; port=' + self.DB_PORT + '; Database=' + self.DB_NAME + '; Schema=' + self.DB_SCHEMA + '; pwd=' + self.DB_USERPWD
 
-	def saveConnectionDefaults(self,DB_USERNAME='postgres',DB_USERPWD='no-password-supplied',DB_HOST='localhost',DB_PORT='1532',DB_NAME='postgres',DB_SCHEMA='public'):
+	def saveConnectionDefaults(self,DB_USERNAME='no-db-user',DB_USERPWD='no-password-supplied',DB_HOST='localhost',DB_PORT='3306',DB_NAME='no-db-name-given',DB_SCHEMA=''):
 		f = open('.pwd','w')
 		f.write(DB_USERPWD)
 		f.close()
@@ -86,8 +86,7 @@ class mysql_db:
 			self.db_conn_dets.DB_SCHEMA = DB_SCHEMA			#if you pass in a schema it overwrites the stored schema
 
 	def dbstr(self):
-		return self.db_conn_dets.DB_NAME + '/' + self.db_conn_dets.DB_SCHEMA + '@' + self.db_conn_dets.DB_HOST
-
+		return 'usr=' + self.db_conn_dets.DB_USERNAME + '; svr=' + self.db_conn_dets.DB_HOST + '; port=' + self.db_conn_dets.DB_PORT + '; Database=' + self.db_conn_dets.DB_NAME + '; pwd=**********'
 
 	def dbversion(self):
 		return self.queryone('SELECT VERSION()')
@@ -125,7 +124,7 @@ class mysql_db:
 		self.db_conn_dets.savepwd(pwd)
 		self.db_conn_dets.DB_USERPWD = pwd
 
-	def saveConnectionDefaults(self,DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME,DB_SCHEMA='public'):
+	def saveConnectionDefaults(self,DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME,DB_SCHEMA=''):
 		self.db_conn_dets.saveConnectionDefaults(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME,DB_SCHEMA)
 
 	def useConnectionDetails(self,DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME,DB_SCHEMA):
@@ -137,7 +136,7 @@ class mysql_db:
 		self.db_conn_dets.DB_NAME = DB_NAME					
 		self.db_conn_dets.DB_SCHEMA = DB_SCHEMA		
 		if self.db_conn_dets.DB_SCHEMA == '':
-			self.db_conn_dets.DB_SCHEMA = 'public'
+			self.db_conn_dets.DB_SCHEMA = ''
 		self.connect()
 
 	def is_an_int(self,prm):
@@ -349,29 +348,47 @@ class mysql_db:
 			self.dbconn.close()
 
 	def connect(self):
-
+		connects_entered = False
 		if self.db_conn_dets.DB_USERPWD == 'no-password-supplied':
-			print('Password must be passed in or stored in order to connect.\n')
-			print('Call \n\t savepwd(pwd) to use defaults or \n') 
-			print('\t saveConnectionDefaults(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME,DB_SCHEMA)\n\n')
+			print('The connection details are not passed in or stored.  In the future, ')
+			print('call saveConnectionDefaults(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME)\n')
 
-			sys.exit(0)
-		else:
-			p_options = "-c search_path=" + self.db_conn_dets.DB_SCHEMA
-			try:
+			self.db_conn_dets.DB_HOST = input('MySQL Host (localhost) :')
+			if self.db_conn_dets.DB_HOST == '':
+				self.db_conn_dets.DB_HOST = 'localhost'
+				print('host ' + self.db_conn_dets.DB_HOST)
 
-				if not self.dbconn:
-					self.dbconn = mysql.connector.connect(
-							host=self.db_conn_dets.DB_HOST,
-							user=self.db_conn_dets.DB_USERNAME,
-							passwd=self.db_conn_dets.DB_USERPWD,
-							database=self.db_conn_dets.DB_NAME,
-							autocommit=True
-					)
-					self.cur = self.dbconn.cursor()
+			self.db_conn_dets.DB_PORT = input('MySQL Port (3306) :')
+			if self.db_conn_dets.DB_PORT == '':
+				self.db_conn_dets.DB_PORT = '3306'
+				print('port ' + self.db_conn_dets.DB_PORT)
 
-			except Exception as e:
-				raise Exception(str(e))
+			self.db_conn_dets.DB_NAME = input('MySQL DB Name :')
+			self.db_conn_dets.DB_USERNAME = input('MySQL username :')
+			self.db_conn_dets.DB_USERPWD = input('MySQL password :')
+			connects_entered = True
+
+		p_options = "-c search_path=" + self.db_conn_dets.DB_SCHEMA
+		try:
+
+			if not self.dbconn:
+				self.dbconn = mysql.connector.connect(
+						host=self.db_conn_dets.DB_HOST,
+						user=self.db_conn_dets.DB_USERNAME,
+						passwd=self.db_conn_dets.DB_USERPWD,
+						database=self.db_conn_dets.DB_NAME,
+						autocommit=True
+				)
+				self.cur = self.dbconn.cursor()
+
+				if connects_entered:
+					user_response_to_save = input('Save this connection locally? (y/n) :')
+					# only if successful connect after user prompted and got Y do we save pwd
+					if user_response_to_save.upper()[:1] == 'Y':
+						self.saveConnectionDefaults(self.db_conn_dets.DB_USERNAME,self.db_conn_dets.DB_USERPWD,self.db_conn_dets.DB_HOST,self.db_conn_dets.DB_PORT,self.db_conn_dets.DB_NAME)
+
+		except Exception as e:
+			raise Exception(str(e))
 
 	def query(self,qry):
 		if not self.dbconn:
@@ -408,20 +425,22 @@ class mysql_db:
 			raise Exception("SQL ERROR:\n\n" + str(e))
 
 if __name__ == '__main__':
-	print ("db command line") # 
-	print('')
 	mydb = mysql_db()
 	mydb.connect()
 	#mydb.enable_logging = True
-	mydb.logquery(mydb.db_conn_dets.dbconnectionstr())
+	#mydb.logquery(mydb.db_conn_dets.dbconnectionstr())
+
+	print('Connected')
 	print('')
-	print(mydb.dbversion())
+	print(mydb.dbstr())
 	print('')
-	qry = """
-				SELECT distinct table_schema as databasename
-				FROM INFORMATION_SCHEMA.tables
-	"""
-	print(mydb.export_query_to_str(qry,'\t'))
+	print('MySQL Version: ' + mydb.dbversion())
+	print('')
+	#qry = """
+	#			SELECT distinct table_schema as databasename
+	#			FROM INFORMATION_SCHEMA.tables
+	#"""
+	#print(mydb.export_query_to_str(qry,'\t'))
 
 	mydb.close()	
 
