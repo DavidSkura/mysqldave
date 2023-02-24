@@ -1,10 +1,6 @@
 ### dbversion()
 returns MySQL version
 
-###  __init__()
-constructor.  
-
-
 ### savepwd(pwd)
 saved password locally so you dont have to pass it in next time
 
@@ -53,5 +49,3 @@ database commit
 
 ### commandline
 connect & version check
-
-
