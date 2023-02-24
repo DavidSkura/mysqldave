@@ -1,24 +1,17 @@
 ### dbversion()
-returns Postgres version
+returns MySQL version
 
-###  __init__(DB_USERPWD,DB_SCHEMA)
-constructor.  DB_USERPWD & DB_SCHEMA are optional
+###  __init__()
+constructor.  
 
-Connection details are all defaulted:
-DatabaseType='Postgres' 
-DB_USERNAME='postgres' 
-DB_HOST='localhost' 
-DB_PORT='1532' 
-DB_NAME='postgres' 
-DB_SCHEMA='public'		
 
 ### savepwd(pwd)
 saved password locally so you dont have to pass it in next time
 
-### saveConnectionDefaults(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME,DB_SCHEMA)
+### saveConnectionDefaults(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME)
 save all connection details locally
 
-### useConnectionDetails(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME,DB_SCHEMA)
+### useConnectionDetails(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME)
 Use these connection details and connect.  
 
 ### is_an_int(prm)

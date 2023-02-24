@@ -52,11 +52,6 @@ class dbconnection_details:
 		except:
 			self.DB_USERPWD='no-password-supplied'
 
-	def savepwd(self,pwd):
-		f = open('.pwd','w')
-		f.write(pwd)
-		f.close()
-
 	def dbconnectionstr(self):
 		return 'usr=' + self.DB_USERNAME + '; svr=' + self.DB_HOST + '; port=' + self.DB_PORT + '; Database=' + self.DB_NAME + '; Schema=' + self.DB_SCHEMA + '; pwd=' + self.DB_USERPWD
 
@@ -72,7 +67,7 @@ class dbconnection_details:
 		self.loadSettingsFromFile()
 
 class mysql_db:
-	def __init__(self,DB_USERPWD='no-password-supplied',DB_SCHEMA='no-schema-supplied'):
+	def __init__(self):
 		self.enable_logging = False
 		self.max_loglines = 500
 		self.db_conn_dets = dbconnection_details()
@@ -119,10 +114,6 @@ class mysql_db:
 					break
 
 			f.close()
-
-	def savepwd(self,pwd):
-		self.db_conn_dets.savepwd(pwd)
-		self.db_conn_dets.DB_USERPWD = pwd
 
 	def saveConnectionDefaults(self,DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME,DB_SCHEMA=''):
 		self.db_conn_dets.saveConnectionDefaults(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME,DB_SCHEMA)

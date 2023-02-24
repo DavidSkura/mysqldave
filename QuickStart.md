@@ -1,37 +1,21 @@
 # Quick Start Guide
 
 ### test your database connection on the commandline
-py -m postgresdave_package.postgresdave
+py -m mysqldave_package.mysqldave
 
-You will be prompted for a password if there is not one saved locally.  You can type in the password when prompted for the test connect and decide to either save the password locally or not using the prompts.
+You will be prompted for connection details if they are not saved locally.  You can type in the details when prompted for the test connect and decide to either save them locally or not using the prompts.
 
-### If your postgres database is installed on your laptop/pc
+### If your MySQL database is installed on your laptop/pc
 
-All the connection details will be defaulted, except password.  You can either enter in the password when prompted or save the password locally once using the method savepwd().  Calling this method once will cause a .pwd file to be created.  After this you don't have to call the savepwd() method again unless the password changes.
+You can either enter in the password when prompted or save the password locally once using the method saveConnectionDefaults().  Calling this method once will cause a .connection & .pwd file to be created.  After this you don't have to call the saveConnectionDefaults() method again unless the password changes.
 
 ---
 
 #### Try just connecting and follow the prompts:
 >
-> from postgresdave_package.postgresdave import db 
+> from mysqldave_package.mysqldave import mysql_db 
 >
-> mydb = db()
->
-> mydb.connect()
->
-> print(mydb.dbversion())
->
-> mydb.close()
-> 
-
-
-#### Alternatively, specify one time, the password in code then connect using defaults:
->
-> from postgresdave_package.postgresdave import db 
->
-> mydb = db()
->
-> ***mydb.savepwd('mypassword')***
+> mydb = mysql_db()
 >
 > mydb.connect()
 >
@@ -40,17 +24,18 @@ All the connection details will be defaulted, except password.  You can either e
 > mydb.close()
 > 
 
-### If your postgres database is installed with other connection details
+
+### If your MySQL database is installed with other connection details
 
 Save the connection details locally once using the method saveConnectionDefaults().  Calling this method once will cause a .connection and .pwd file to be created.  After this you don't have to call the saveConnectionDefaults() method again unless the connection details change.
 
 ---
 >
-> from postgresdave_package.postgresdave import db 
+> from mysqldave_package.mysqldave import mysql_db 
 >
-> mydb = db()
+> mydb = mysql_db()
 >
-> mydb.saveConnectionDefaults(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME,DB_SCHEMA)
+> mydb.saveConnectionDefaults(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME)
 >
 > mydb.connect()
 >
@@ -62,9 +47,9 @@ Save the connection details locally once using the method saveConnectionDefaults
 ### Connect and run your queries using execute(qry),query(qry),queryone(qry),export_query_to_str(qry)
 
 >
-> from postgresdave_package.postgresdave import db 
+> from mysqldave_package.mysqldave import mysql_db 
 >
-> mydb = db()
+> mydb = mysql_db()
 >
 > mydb.connect()
 >
@@ -89,12 +74,12 @@ Save the connection details locally once using the method saveConnectionDefaults
 > mydb.close()
 > 
 
-### Load a Postgres table from a matching csv file
+### Load a MySQL table from a matching csv file
 
 >
-> from postgresdave_package.postgresdave import db 
+> from mysqldave_package.mysqldave import mysql_db 
 >
-> mydb = db()
+> mydb = mysql_db()
 >
 > mydb.connect()
 >
@@ -105,12 +90,12 @@ Save the connection details locally once using the method saveConnectionDefaults
 > mydb.close()
 >
 
-### Export a Postgres table to a csv file
+### Export a MySQL table to a csv file
 
 >
-> from postgresdave_package.postgresdave import db 
+> from mysqldave_package.mysqldave import mysql_db 
 >
-> mydb = db()
+> mydb = mysql_db()
 >
 > mydb.connect()
 >

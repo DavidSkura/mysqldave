@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mysqldave_package"
-version = "1.2.0"
+version = "1.2.1"
 authors = [
   { name="Dave Skura", email="dskura@gmail.com" },
 ]
