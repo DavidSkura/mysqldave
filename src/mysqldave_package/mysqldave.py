@@ -52,6 +52,8 @@ class dbconnection_details:
 		except:
 			self.DB_USERPWD='no-password-supplied'
 
+		#print(self.dbconnectionstr())
+
 	def dbconnectionstr(self):
 		return 'usr=' + self.DB_USERNAME + '; svr=' + self.DB_HOST + '; port=' + self.DB_PORT + '; Database=' + self.DB_NAME + '; Schema=' + self.DB_SCHEMA + '; pwd=' + self.DB_USERPWD
 
@@ -73,12 +75,6 @@ class mysql_db:
 		self.db_conn_dets = dbconnection_details()
 		self.dbconn = None
 		self.cur = None
-
-		if DB_USERPWD != 'no-password-supplied':
-			self.db_conn_dets.DB_USERPWD = DB_USERPWD			#if you pass in a password it overwrites the stored pwd
-
-		if DB_SCHEMA != 'no-schema-supplied':
-			self.db_conn_dets.DB_SCHEMA = DB_SCHEMA			#if you pass in a schema it overwrites the stored schema
 
 	def dbstr(self):
 		return 'usr=' + self.db_conn_dets.DB_USERNAME + '; svr=' + self.db_conn_dets.DB_HOST + '; port=' + self.db_conn_dets.DB_PORT + '; Database=' + self.db_conn_dets.DB_NAME + '; pwd=**********'
@@ -417,15 +413,12 @@ class mysql_db:
 
 if __name__ == '__main__':
 	mydb = mysql_db()
-	mydb.connect()
 	#mydb.enable_logging = True
 	#mydb.logquery(mydb.db_conn_dets.dbconnectionstr())
 
-	print('Connected')
+	print('Connected to MySQL version ' + mydb.dbversion())
 	print('')
-	print(mydb.dbstr())
-	print('')
-	print('MySQL Version: ' + mydb.dbversion())
+	print('using : ' + mydb.dbstr())
 	print('')
 	#qry = """
 	#			SELECT distinct table_schema as databasename

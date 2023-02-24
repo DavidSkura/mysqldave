@@ -17,8 +17,6 @@ You can either enter in the password when prompted or save the password locally 
 >
 > mydb = mysql_db()
 >
-> mydb.connect()
->
 > print(mydb.dbversion())
 >
 > mydb.close()
@@ -37,8 +35,6 @@ Save the connection details locally once using the method saveConnectionDefaults
 >
 > mydb.saveConnectionDefaults(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME)
 >
-> mydb.connect()
->
 > print(mydb.dbversion())
 >
 > mydb.close()
@@ -50,8 +46,6 @@ Save the connection details locally once using the method saveConnectionDefaults
 > from mysqldave_package.mysqldave import mysql_db 
 >
 > mydb = mysql_db()
->
-> mydb.connect()
 >
 > print(mydb.dbversion())
 >
@@ -81,8 +75,6 @@ Save the connection details locally once using the method saveConnectionDefaults
 >
 > mydb = mysql_db()
 >
-> mydb.connect()
->
 > mydb.load_csv_to_table('customer.csv','customer',True,'\t') # truncate first=True, delimiter=tab
 >
 > print('Table loaded')
@@ -96,8 +88,6 @@ Save the connection details locally once using the method saveConnectionDefaults
 > from mysqldave_package.mysqldave import mysql_db 
 >
 > mydb = mysql_db()
->
-> mydb.connect()
 >
 > mydb.export_table_to_csv('customer.csv','customer','\t') # delimiter=tab
 >
