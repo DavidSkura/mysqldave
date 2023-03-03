@@ -426,5 +426,15 @@ if __name__ == '__main__':
 	#"""
 	#print(mydb.export_query_to_str(qry,'\t'))
 
+	print('table_count = ' + str(mydb.queryone('SELECT COUNT(*) as table_count FROM INFORMATION_SCHEMA.TABLES')))
+	print(' - - - - - - - - - - - - - - - - - - - - - - - - - - -  \n')
+
+	qry = """
+			SELECT table_schema as databasename, COUNT(*) as table_count 
+			FROM INFORMATION_SCHEMA.tables 
+			GROUP BY table_schema
+	"""
+	print(mydb.export_query_to_str(qry,'\t'))
+
 	mydb.close()	
 
