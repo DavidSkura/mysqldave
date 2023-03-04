@@ -8,6 +8,8 @@ import sys
 import mysql.connector 
 from datetime import *
 import time
+from garbledave_package.garbledave import garbledave 
+
 
 class dbconnection_details: 
 	def __init__(self): 
@@ -27,7 +29,7 @@ class dbconnection_details:
 		try:
 			f = open('.schemawiz_config2','r')
 			connectionstrlines = f.read()
-			connectionstr = connectionstrlines.splitlines()[0]
+			connectionstr = garbledave().ungarbleit(connectionstrlines.splitlines()[0])
 			f.close()
 			connarr = connectionstr.split(' - ')
 
@@ -53,7 +55,7 @@ class dbconnection_details:
 	def saveConnectionDefaults(self,DB_USERNAME='postgres',DB_USERPWD='no-password-supplied',DB_HOST='localhost',DB_PORT='1532',DB_NAME='postgres'):
 
 		f = open('.schemawiz_config2','w')
-		f.write(DB_USERNAME + ' - ' + DB_USERPWD + ' - ' + DB_HOST + ' - ' + DB_PORT + ' - ' + DB_NAME )
+		f.write(garbledave().garbleit(DB_USERNAME + ' - ' + DB_USERPWD + ' - ' + DB_HOST + ' - ' + DB_PORT + ' - ' + DB_NAME ))
 		f.close()
 
 		self.loadSettingsFromFile()

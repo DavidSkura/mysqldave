@@ -1,11 +1,11 @@
 [build-system]
-requires = ["hatchling","mysql.connector"]
+requires = ["hatchling","mysql.connector","garbledave_package"]
 
 build-backend = "hatchling.build"
 
 [project]
 name = "mysqldave_package"
-version = "1.2.5"
+version = "1.3.0"
 authors = [
   { name="Dave Skura", email="dskura@gmail.com" },
 ]
