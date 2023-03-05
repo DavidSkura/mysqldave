@@ -361,6 +361,7 @@ WHERE table_schema = '""" + dbname + """' and
 			self.execute(qry)
 
 	def does_table_exist(self,tblname):
+		self.connect()
 
 		sql = """
 SELECT count(*)  
