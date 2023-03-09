@@ -103,20 +103,21 @@ class mysql_db:
 		tablefields = []
 		sql = """
 SELECT  column_name
-    ,data_type
+    ,CAST(data_type as char(255)) as data_type
 	,CASE 
-        WHEN data_type in ('date','timestamp') THEN 'QUOTE'
-        WHEN data_type in ('char','varchar','text','mediumtext','longtext') THEN 'QUOTE'
-        WHEN data_type in ('blob','mediumblob','longblob','json') THEN 'QUOTE'
+        WHEN lower(data_type) in ('date','timestamp') THEN 'QUOTE'
+        WHEN lower(data_type) in ('char','varchar','text','mediumtext','longtext') THEN 'QUOTE'
+        WHEN lower(data_type) in ('blob','mediumblob','longblob','json') THEN 'QUOTE'
         ELSE
             'NO QUOTE'
     END as Need_Quotes    
     ,ordinal_position
-    ,column_comment
-    ,isc.*
+    ,CAST(column_comment as char(255)) as column_comment
+
 FROM INFORMATION_SCHEMA.COLUMNS isc
-WHERE table_schema = '""" + dbname + """' and 
-    table_name = '""" + tablename + """'
+WHERE upper(table_schema) = upper('""" + dbname + """') and 
+    upper(table_name) = upper('""" + tablename + """')
+ORDER BY ordinal_position
 		"""
 
 		data = self.query(sql)
@@ -134,7 +135,7 @@ WHERE table_schema = '""" + dbname + """' and
 		return tablefields
 
 	def dbstr(self):
-		return 'usr=' + self.db_conn_dets.DB_USERNAME + '; svr=' + self.db_conn_dets.DB_HOST + '; port=' + self.db_conn_dets.DB_PORT + '; Database=' + self.db_conn_dets.DB_NAME + '; pwd=**********'
+		return 'usr=' + self.db_conn_dets.DB_USERNAME + '; svr=' + self.db_conn_dets.DB_HOST + '; port=' + self.db_conn_dets.DB_PORT + '; Database=' + self.db_conn_dets.DB_NAME
 
 	def dbversion(self):
 		return self.queryone('SELECT VERSION()')
@@ -273,16 +274,7 @@ WHERE table_schema = '""" + dbname + """' and
 		if not self.does_table_exist(tblname):
 			raise Exception('Table does not exist.  Create table first')
 
-		this_schema = tblname.split('.')[0]
-		try:
-			this_table = tblname.split('.')[1]
-		except:
-			this_schema = self.db_conn_dets.DB_SCHEMA
-			this_table = tblname.split('.')[0]
-
-		qualified_table = this_schema + '.' + this_table
-
-		self.export_query_to_csv('SELECT * FROM ' + qualified_table,csvfile,szdelimiter)
+		self.export_query_to_csv('SELECT * FROM ' + tblname,csvfile,szdelimiter)
 
 	def load_csv_to_table(self,csvfile,tblname,withtruncate=True,szdelimiter=',',fields='',withextrafields={}):
 		table_fields = self.getfielddefs(self.db_conn_dets.DB_NAME,tblname)
@@ -323,6 +315,10 @@ WHERE table_schema = '""" + dbname + """' and
 							newline += "'" + withextrafields[var]  + "',"
 
 						for j in range(0,len(row)):
+							#print(table_fields[j].data_type.strip().lower())
+							#print(table_fields[j].comment)
+							#print(self.getbetween(table_fields[j].comment,'[',']'))
+
 							if row[j].lower() == 'none' or row[j].lower() == 'null':
 								newline += "NULL,"
 							else:
@@ -343,13 +339,19 @@ WHERE table_schema = '""" + dbname + """' and
 								elif table_fields[j].Need_Quotes == 'QUOTE':
 									newline += "'" + self.clean_text(row[j]).replace(',','').replace("'",'').replace('"','') + "',"
 								else:
-									newline += self.clean_text(row[j]).replace(',','').replace("'",'').replace('"','') + ","
+									val = self.clean_text(row[j]).replace(',','').replace("'",'').replace('"','')
+									if val == '':
+										newline += "NULL,"
+									else:
+										newline += val + ","
 
 							
 						ilines += newline[:-1] + '),'
 						
 						if batchcount > 500:
 							qry = isqlhdr + ilines[:-1]
+							#print(qry)
+							#sys.exit(0)
 							batchcount = 0
 							ilines = ''
 							self.execute(qry)
@@ -366,7 +368,7 @@ WHERE table_schema = '""" + dbname + """' and
 		sql = """
 SELECT count(*)  
 FROM information_schema.tables
-WHERE table_schema = '""" + self.db_conn_dets.DB_NAME + """' and table_name='""" + tblname + """'
+WHERE upper(table_schema) = upper('""" + self.db_conn_dets.DB_NAME + """') and upper(table_name)=upper('""" + tblname + """')
 		"""
 		
 		if self.queryone(sql) == 0:
@@ -454,14 +456,9 @@ if __name__ == '__main__':
 	mydb = mysql_db()
 	mydb.connect()
 	print(mydb.dbstr())
-	#csvfilename = 'tesla.csv'
-	#tblname = 'tesla_csv'
-
-	#print ("Processing " + csvfilename) # 
-
-	#mydb.load_csv_to_table(csvfilename,tblname,False,',')
-
-	#print('Table now has ' + tblname + ' has ' + str(mydb.queryone('SELECT COUNT(*) FROM ' + tblname)) + ' rows.\n') 
+	#csvfilename = 'sample.csv'
+	#tblname = 'sample7'
+	#mydb.load_csv_to_table(csvfilename,tblname,True,',')
 
 	mydb.close()
 
