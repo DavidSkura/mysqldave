@@ -6,6 +6,10 @@ build-backend = "hatchling.build"
 [project]
 name = "mysqldave_package"
 version = "1.3.7"
+dependencies = [
+  'mysql-connector-python >= 8.0.32',
+  'garbledave_package >= 1.0.0'
+]
 authors = [
   { name="Dave Skura", email="dskura@gmail.com" },
 ]
