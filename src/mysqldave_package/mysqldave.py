@@ -10,6 +10,17 @@ from datetime import *
 import time
 from garbledave_package.garbledave import garbledave 
 
+def main():
+	mydb = mysql_db()
+	mydb.connect()
+	print(mydb.dbstr())
+
+	#csvfilename = 'sample.csv'
+	#tblname = 'sample7'
+	#mydb.load_csv_to_table(csvfilename,tblname,True,',')
+
+	mydb.close()
+
 
 class dbconnection_details: 
 	def __init__(self): 
@@ -282,8 +293,10 @@ ORDER BY ordinal_position
 		if not self.does_table_exist(tblname):
 			raise Exception('Table does not exist.  Create table first')
 
+
 		if withtruncate:
 			self.execute('TRUNCATE TABLE ' + tblname)
+
 
 		f = open(csvfile,'r')
 		hdrs = f.read(1000).split('\n')[0].strip().split(szdelimiter)
@@ -370,14 +383,14 @@ SELECT count(*)
 FROM information_schema.tables
 WHERE upper(table_schema) = upper('""" + self.db_conn_dets.DB_NAME + """') and upper(table_name)=upper('""" + tblname + """')
 		"""
-		
 		if self.queryone(sql) == 0:
 			return False
 		else:
 			return True
 
+
 	def close(self):
-		if self.dbconn:
+		if self.dbconn.is_connected():
 			self.dbconn.close()
 
 	def ask_for_database_details(self):
@@ -395,22 +408,20 @@ WHERE upper(table_schema) = upper('""" + self.db_conn_dets.DB_NAME + """') and u
 			connects_entered = True
 
 		try:
+			self.dbconn = mysql.connector.connect(
+					host=self.db_conn_dets.DB_HOST,
+					user=self.db_conn_dets.DB_USERNAME,
+					passwd=self.db_conn_dets.DB_USERPWD,
+					database=self.db_conn_dets.DB_NAME,
+					autocommit=True
+			)
+			self.cur = self.dbconn.cursor()
 
-			if not self.dbconn:
-				self.dbconn = mysql.connector.connect(
-						host=self.db_conn_dets.DB_HOST,
-						user=self.db_conn_dets.DB_USERNAME,
-						passwd=self.db_conn_dets.DB_USERPWD,
-						database=self.db_conn_dets.DB_NAME,
-						autocommit=True
-				)
-				self.cur = self.dbconn.cursor()
-
-				if connects_entered:
-					user_response_to_save = input('Save this connection locally? (y/n) :')
-					# only if successful connect after user prompted and got Y do we save pwd
-					if user_response_to_save.upper()[:1] == 'Y':
-						self.saveConnectionDefaults(self.db_conn_dets.DB_USERNAME,self.db_conn_dets.DB_USERPWD,self.db_conn_dets.DB_HOST,self.db_conn_dets.DB_PORT,self.db_conn_dets.DB_NAME)
+			if connects_entered:
+				user_response_to_save = input('Save this connection locally? (y/n) :')
+				# only if successful connect after user prompted and got Y do we save pwd
+				if user_response_to_save.upper()[:1] == 'Y':
+					self.saveConnectionDefaults(self.db_conn_dets.DB_USERNAME,self.db_conn_dets.DB_USERPWD,self.db_conn_dets.DB_HOST,self.db_conn_dets.DB_PORT,self.db_conn_dets.DB_NAME)
 
 		except Exception as e:
 			if self.db_conn_dets.settings_loaded_from_file:
@@ -419,7 +430,7 @@ WHERE upper(table_schema) = upper('""" + self.db_conn_dets.DB_NAME + """') and u
 			raise Exception(str(e))
 
 	def query(self,qry):
-		if not self.dbconn:
+		if not self.dbconn.is_connected():
 			self.connect()
 
 		self.execute(qry)
@@ -427,16 +438,19 @@ WHERE upper(table_schema) = upper('""" + self.db_conn_dets.DB_NAME + """') and u
 		return all_rows_of_data
 
 	def commit(self):
-		self.dbconn.commit()
-
+		#mysql is autocommit so do nothing here
+		committed = True
+		#self.dbconn.commit()
 
 	def execute(self,qry):
 		try:
 			begin_at = time.time() * 1000
-			if not self.dbconn:
+			if not self.dbconn.is_connected():
 				self.connect()
 			self.cur.execute(qry)
+
 			end_at = time.time() * 1000
+
 			duration = end_at - begin_at
 			self.logquery(qry,duration)
 		except Exception as e:
@@ -444,7 +458,7 @@ WHERE upper(table_schema) = upper('""" + self.db_conn_dets.DB_NAME + """') and u
 
 	def queryone(self,select_one_fld):
 		try:
-			if not self.dbconn:
+			if not self.dbconn.is_connected():
 				self.connect()
 			self.execute(select_one_fld)
 			retval=self.cur.fetchone()
@@ -453,12 +467,4 @@ WHERE upper(table_schema) = upper('""" + self.db_conn_dets.DB_NAME + """') and u
 			raise Exception("SQL ERROR:\n\n" + str(e))
 
 if __name__ == '__main__':
-	mydb = mysql_db()
-	mydb.connect()
-	print(mydb.dbstr())
-	#csvfilename = 'sample.csv'
-	#tblname = 'sample7'
-	#mydb.load_csv_to_table(csvfilename,tblname,True,',')
-
-	mydb.close()
-
+	main()
