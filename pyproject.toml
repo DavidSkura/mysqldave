@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "mysqldave_package"
-version = "1.4.0"
+version = "1.5.0"
 dependencies = [
   'mysql-connector-python >= 8.0.32',
   'garbledave_package >= 1.0.0'

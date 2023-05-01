@@ -15,8 +15,8 @@ def main():
 	mydb.connect()
 	print(mydb.dbstr())
 
-	#csvfilename = 'sample.csv'
-	#tblname = 'sample7'
+	#csvfilename = 'testcase1.csv'
+	#tblname = 'testcase1'
 	#mydb.load_csv_to_table(csvfilename,tblname,True,',')
 
 	mydb.close()
@@ -82,6 +82,8 @@ class tfield:
 
 class mysql_db:
 	def __init__(self,DB_USERPWD='no-password-supplied',DB_SCHEMA='no-schema-supplied'):
+		self.delimiter = ''
+		self.delimiter_replace = '^~^'
 		self.enable_logging = False
 		self.max_loglines = 500
 		self.db_conn_dets = dbconnection_details()
@@ -153,17 +155,16 @@ ORDER BY ordinal_position
 
 	def clean_column_name(self,col_name):
 
-		new_column_name = col_name
-		chardict = self.count_chars(col_name)
-		alphacount = self.count_alpha(chardict)
-		nbrcount = self.count_nbr(chardict)
-		if ((len(col_name)-2) == (alphacount + nbrcount)) and '1234567890'.find(col_name[:1]) == -1:
-			new_column_name = self.clean_text(col_name) # .replace('"','').strip()
+		col = col_name.replace(' ','_')
+		new_column_name = ''
+		for i in range(0,len(col)):
+			if 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_'.find(col[i]) > -1:
+				new_column_name += col[i]
 
 		return new_column_name
 
 	def clean_text(self,ptext): # remove optional double quotes
-		text = ptext.strip()
+		text = ptext.replace(self.delimiter_replace,self.delimiter).strip()
 		if (text[:1] == '"' and text[-1:] == '"'):
 			return text[1:-1]
 		else:
@@ -287,7 +288,30 @@ ORDER BY ordinal_position
 
 		self.export_query_to_csv('SELECT * FROM ' + tblname,csvfile,szdelimiter)
 
+
+	def handledblquotes(self,rowwithquotes):
+		newstr = ''
+		quotecount = 0
+		cvtmode = False
+		for i in range (0,len(rowwithquotes)-1):
+			if rowwithquotes[i] == '"':
+				quotecount += 1
+			
+			if (quotecount % 2) == 1:
+				cvtmode = True 
+			else:
+				cvtmode = False
+
+			if cvtmode and rowwithquotes[i] == self.delimiter:
+				newstr += self.delimiter_replace
+			elif rowwithquotes[i] != '"':
+				newstr += rowwithquotes[i]
+			
+		return newstr
+
+
 	def load_csv_to_table(self,csvfile,tblname,withtruncate=True,szdelimiter=',',fields='',withextrafields={}):
+		self.delimiter = szdelimiter
 		table_fields = self.getfielddefs(self.db_conn_dets.DB_NAME,tblname)
 
 		if not self.does_table_exist(tblname):
@@ -322,7 +346,8 @@ ORDER BY ordinal_position
 						skiprow1 = 1
 					else:
 						batchcount += 1
-						row = line.rstrip("\n").split(szdelimiter)
+						unquotedline = self.handledblquotes(line.rstrip("\n"))
+						row = unquotedline.split(szdelimiter)
 						newline = "("
 						for var in withextrafields:
 							newline += "'" + withextrafields[var]  + "',"
@@ -350,9 +375,9 @@ ORDER BY ordinal_position
 										newline += "'" + self.clean_text(row[j]) + "',"
 
 								elif table_fields[j].Need_Quotes == 'QUOTE':
-									newline += "'" + self.clean_text(row[j]).replace(',','').replace("'",'').replace('"','') + "',"
+									newline += "'" + self.clean_text(row[j]).replace("'",'').replace('"','') + "',"
 								else:
-									val = self.clean_text(row[j]).replace(',','').replace("'",'').replace('"','')
+									val = self.clean_text(row[j]).replace("'",'').replace('"','')
 									if val == '':
 										newline += "NULL,"
 									else:
