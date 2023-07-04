@@ -2,7 +2,7 @@
   -- Dave Skura, 2023
 */
 
-```
+```sql
 -- list tables 
 SELECT 
     table_catalog as idatabase
@@ -17,7 +17,7 @@ WHERE table_schema not in ('information_schema','performance_schema','sys');
 ```
 
 
-```
+```sql
 -- Schemas by rowcount/size 
 SELECT 
     table_catalog as idatabase
@@ -40,7 +40,7 @@ WHERE table_schema not in ('information_schema','performance_schema','sys')
 GROUP BY table_catalog,table_schema;
 ```
 
-```
+```sql
 -- 5 biggest tables by schema counting rows and byte size 
 
 SELECT *
