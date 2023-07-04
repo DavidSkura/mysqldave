@@ -12,10 +12,10 @@ WHERE table_name = 'city' AND table_schema = 'world';
 ANALYZE TABLE city;
 ```
 
-## Generate stats for a table with Histogram of columns 
-## A histogram is an approximation of the data distribution for a column. 
-## It can tell you with a reasonably accuray whether your data is skewed or not, 
-## which in turn will help the database server understand the nature of data it contains
+### Generate stats for a table with Histogram of columns 
+A histogram is an approximation of the data distribution for a column. 
+It can tell you with a reasonably accuray whether your data is skewed or not, 
+which in turn will help the database server understand the nature of data it contains
 
 ```sql
 -- Generate stats for a table with Histogram of columns
