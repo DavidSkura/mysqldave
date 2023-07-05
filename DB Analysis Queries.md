@@ -1,6 +1,3 @@
-/*
-  -- Dave Skura, 2023
-*/
 
 ```sql
 -- list tables 
