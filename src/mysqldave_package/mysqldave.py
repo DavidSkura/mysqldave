@@ -14,7 +14,9 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 def main():
-	mydb = mysql_db('newconnection')
+	mydb = mysql_db('this connection')
+	mydb.connect()
+	mydb = mysql_db('another connection')
 	mydb.connect()
 	print(mydb.dbstr())
 
@@ -81,8 +83,8 @@ class dbconnection_details:
 
 	def saveConnectionDefaults(self,DB_USERNAME='postgres',DB_USERPWD='no-password-supplied',DB_HOST='localhost',DB_PORT='1532',DB_NAME='postgres'):
 
-		f = open('.schemawiz_config2','w')
-		f.write(garbledave().garbleit(self.DSN + ' - ' + DB_USERNAME + ' - ' + DB_USERPWD + ' - ' + DB_HOST + ' - ' + DB_PORT + ' - ' + DB_NAME ))
+		f = open('.schemawiz_config2','a')
+		f.write(garbledave().garbleit(self.DSN + ' - ' + DB_USERNAME + ' - ' + DB_USERPWD + ' - ' + DB_HOST + ' - ' + DB_PORT + ' - ' + DB_NAME )+ '\n')
 		f.close()
 
 		self.loadSettingsFromFile()
@@ -98,7 +100,7 @@ class tfield:
 
 class mysql_db:
 	def __init__(self,DSN='default',DB_USERPWD='no-password-supplied',DB_SCHEMA='no-schema-supplied'):
-		self.DSN = DSN
+		self.DSN = DSN.replace('_','')
 		self.delimiter = ''
 		self.delimiter_replace = '^~^'
 		self.enable_logging = False
