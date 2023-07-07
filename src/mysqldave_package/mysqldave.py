@@ -9,9 +9,12 @@ import mysql.connector
 from datetime import *
 import time
 from garbledave_package.garbledave import garbledave 
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 def main():
-	mydb = mysql_db()
+	mydb = mysql_db('newconnection')
 	mydb.connect()
 	print(mydb.dbstr())
 
@@ -23,7 +26,9 @@ def main():
 
 
 class dbconnection_details: 
-	def __init__(self): 
+	def __init__(self,DSN):
+		self.DSN = DSN
+
 		self.DatabaseType='MySQL' 
 		self.updated='Feb 28/2023' 
 
@@ -39,20 +44,31 @@ class dbconnection_details:
 	def loadSettingsFromFile(self):
 		try:
 			f = open('.schemawiz_config2','r')
-			connectionstrlines = f.read()
-			connectionstr = garbledave().ungarbleit(connectionstrlines.splitlines()[0])
+			connectionfiledata = f.read()
+			connectionstrlines = connectionfiledata.split('\n')
 			f.close()
-			connarr = connectionstr.split(' - ')
+			found_dsn = False
+			for connectionline in connectionstrlines:
+				logging.info(connectionline)
+				connectionstr = garbledave().ungarbleit(connectionline)
+				connarr = connectionstr.split(' - ')
+				if connarr[0] == self.DSN:
+					logging.info('found DSN: ' + self.DSN)
 
-			self.DB_USERNAME	= connarr[0]
-			self.DB_USERPWD		= connarr[1]
-			self.DB_HOST			= connarr[2] 
-			self.DB_PORT			= connarr[3]
-			self.DB_NAME			= connarr[4]
+					self.DB_USERNAME	= connarr[1]
+					self.DB_USERPWD		= connarr[2]
+					self.DB_HOST			= connarr[3] 
+					self.DB_PORT			= connarr[4]
+					self.DB_NAME			= connarr[5]
+					found_dsn = True
+					break;
 
 			self.settings_loaded_from_file = True
 
 		except:
+			found_dsn = False
+
+		if not found_dsn:
 			#saved connection details not found. using defaults
 			self.DB_USERNAME='no db user' 
 			self.DB_HOST='localhost' 
@@ -61,12 +77,12 @@ class dbconnection_details:
 			self.DB_USERPWD='no-password-supplied'
 
 	def dbconnectionstr(self):
-		return 'usr=' + self.DB_USERNAME + '; svr=' + self.DB_HOST + '; port=' + self.DB_PORT + '; Database=' + self.DB_NAME + '; pwd=' + self.DB_USERPWD
+		return 'dsn=' + self.DSN + '; usr=' + self.DB_USERNAME + '; svr=' + self.DB_HOST + '; port=' + self.DB_PORT + '; DB Name=' + self.DB_NAME 
 
 	def saveConnectionDefaults(self,DB_USERNAME='postgres',DB_USERPWD='no-password-supplied',DB_HOST='localhost',DB_PORT='1532',DB_NAME='postgres'):
 
 		f = open('.schemawiz_config2','w')
-		f.write(garbledave().garbleit(DB_USERNAME + ' - ' + DB_USERPWD + ' - ' + DB_HOST + ' - ' + DB_PORT + ' - ' + DB_NAME ))
+		f.write(garbledave().garbleit(self.DSN + ' - ' + DB_USERNAME + ' - ' + DB_USERPWD + ' - ' + DB_HOST + ' - ' + DB_PORT + ' - ' + DB_NAME ))
 		f.close()
 
 		self.loadSettingsFromFile()
@@ -81,12 +97,13 @@ class tfield:
 		self.comment = '' # dateformat in csv [%Y/%m/%d]
 
 class mysql_db:
-	def __init__(self,DB_USERPWD='no-password-supplied',DB_SCHEMA='no-schema-supplied'):
+	def __init__(self,DSN='default',DB_USERPWD='no-password-supplied',DB_SCHEMA='no-schema-supplied'):
+		self.DSN = DSN
 		self.delimiter = ''
 		self.delimiter_replace = '^~^'
 		self.enable_logging = False
 		self.max_loglines = 500
-		self.db_conn_dets = dbconnection_details()
+		self.db_conn_dets = dbconnection_details(self.DSN)
 		self.dbconn = None
 		self.cur = None
 
@@ -148,7 +165,7 @@ ORDER BY ordinal_position
 		return tablefields
 
 	def dbstr(self):
-		return 'usr=' + self.db_conn_dets.DB_USERNAME + '; svr=' + self.db_conn_dets.DB_HOST + '; port=' + self.db_conn_dets.DB_PORT + '; Database=' + self.db_conn_dets.DB_NAME
+		return self.db_conn_dets.dbconnectionstr()
 
 	def dbversion(self):
 		return self.queryone('SELECT VERSION()')
@@ -419,6 +436,7 @@ WHERE upper(table_schema) = upper('""" + self.db_conn_dets.DB_NAME + """') and u
 			self.dbconn.close()
 
 	def ask_for_database_details(self):
+		print('Asking about DSN: ' +  self.DSN)
 		self.db_conn_dets.DB_HOST = input('DB_HOST (localhost): ') or 'localhost'
 		self.db_conn_dets.DB_PORT = input('DB_PORT (3306): ') or '3306'
 		self.db_conn_dets.DB_NAME = input('DB_NAME (atlas): ') or 'atlas'
