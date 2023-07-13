@@ -11,14 +11,15 @@ import time
 from garbledave_package.garbledave import garbledave 
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 
 def main():
 	mydb = mysql_db('this connection')
 	mydb.connect()
-	mydb = mysql_db('another connection')
-	mydb.connect()
 	print(mydb.dbstr())
+
+
+	mydb.export_table_to_csv('this.tsv','information_schema.tables',',')
 
 	#csvfilename = 'testcase1.csv'
 	#tblname = 'testcase1'
@@ -81,7 +82,7 @@ class dbconnection_details:
 	def dbconnectionstr(self):
 		return 'dsn=' + self.DSN + '; usr=' + self.DB_USERNAME + '; svr=' + self.DB_HOST + '; port=' + self.DB_PORT + '; DB Name=' + self.DB_NAME 
 
-	def saveConnectionDefaults(self,DB_USERNAME='postgres',DB_USERPWD='no-password-supplied',DB_HOST='localhost',DB_PORT='1532',DB_NAME='postgres'):
+	def saveConnectionDefaults(self,DB_USERNAME='unknown',DB_USERPWD='unknown',DB_HOST='unknown',DB_PORT='unknown',DB_NAME='unknown'):
 
 		f = open('.schemawiz_config2','a')
 		f.write(garbledave().garbleit(self.DSN + ' - ' + DB_USERNAME + ' - ' + DB_USERPWD + ' - ' + DB_HOST + ' - ' + DB_PORT + ' - ' + DB_NAME )+ '\n')
@@ -422,10 +423,17 @@ ORDER BY ordinal_position
 	def does_table_exist(self,tblname):
 		self.connect()
 
+		if tblname.find('.') > -1:
+			this_schema = tblname.split('.')[0]
+			this_tbl = tblname.split('.')[1]
+		else:
+			this_schema = self.db_conn_dets.DB_NAME
+			this_tbl = tblname
+
 		sql = """
 SELECT count(*)  
 FROM information_schema.tables
-WHERE upper(table_schema) = upper('""" + self.db_conn_dets.DB_NAME + """') and upper(table_name)=upper('""" + tblname + """')
+WHERE upper(table_schema) = upper('""" + this_schema + """') and upper(table_name)=upper('""" + this_tbl + """')
 		"""
 		if self.queryone(sql) == 0:
 			return False
@@ -441,9 +449,9 @@ WHERE upper(table_schema) = upper('""" + self.db_conn_dets.DB_NAME + """') and u
 		print('Asking about DSN: ' +  self.DSN)
 		self.db_conn_dets.DB_HOST = input('DB_HOST (localhost): ') or 'localhost'
 		self.db_conn_dets.DB_PORT = input('DB_PORT (3306): ') or '3306'
-		self.db_conn_dets.DB_NAME = input('DB_NAME (atlas): ') or 'atlas'
+		self.db_conn_dets.DB_NAME = input('DB_NAME (): ') or ''
 		self.db_conn_dets.DB_USERNAME = input('DB_USERNAME (dave): ') or 'dave'
-		self.db_conn_dets.DB_USERPWD = input('DB_USERPWD: ') or 'dave'
+		self.db_conn_dets.DB_USERPWD = input('DB_USERPWD: ') or '4165605869'
 
 	def connect(self):
 		connects_entered = False
