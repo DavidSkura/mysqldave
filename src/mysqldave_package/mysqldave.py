@@ -19,18 +19,24 @@ def main():
 	#print(mydb.dbstr())
 	DB_USERNAME = 'dbadmin'
 	DB_USERPWD = 'Na$d0m!23'
-	DB_HOST='10.100.12.80'
+	DB_HOST='10.100.12.99'
 	DB_PORT='3355'
 	DB_NAME = ''
 
 	conn = mydb.useConnectionDetails(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME)
 
-	#mydb.export_table_to_csv('this.tsv','information_schema.tables',',')
-
-	#csvfilename = 'testcase1.csv'
-	#tblname = 'testcase1'
-	#mydb.load_csv_to_table(csvfilename,tblname,True,',')
-
+	data = mydb.query("""
+		SELECT
+				(@row_number:=@row_number + 1) AS row_num
+				,L.*
+		FROM (
+				SELECT DISTINCT table_schema FROM INFORMATION_SCHEMA.TABLES
+				WHERE table_schema not in ('performance_schema','sys','information_schema')
+				) L,
+				(SELECT @row_number := 0) x
+		ORDER BY table_schema;
+		""")
+	print(data)
 	mydb.close()
 
 
