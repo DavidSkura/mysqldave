@@ -14,12 +14,18 @@ import logging
 logging.basicConfig(level=logging.ERROR)
 
 def main():
-	mydb = mysql_db('this connection')
-	mydb.connect()
-	print(mydb.dbstr())
+	mydb = mysql_db()
+	#mydb.connect()
+	#print(mydb.dbstr())
+	DB_USERNAME = 'dbadmin'
+	DB_USERPWD = 'Na$d0m!23'
+	DB_HOST='10.100.12.80'
+	DB_PORT='3355'
+	DB_NAME = ''
 
+	conn = mydb.useConnectionDetails(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME)
 
-	mydb.export_table_to_csv('this.tsv','information_schema.tables',',')
+	#mydb.export_table_to_csv('this.tsv','information_schema.tables',',')
 
 	#csvfilename = 'testcase1.csv'
 	#tblname = 'testcase1'
@@ -463,6 +469,7 @@ WHERE upper(table_schema) = upper('""" + this_schema + """') and upper(table_nam
 		try:
 			self.dbconn = mysql.connector.connect(
 					host=self.db_conn_dets.DB_HOST,
+					port=self.db_conn_dets.DB_PORT,
 					user=self.db_conn_dets.DB_USERNAME,
 					passwd=self.db_conn_dets.DB_USERPWD,
 					database=self.db_conn_dets.DB_NAME,
