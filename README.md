@@ -13,3 +13,6 @@ https://github.com/daveskura/mysqldave/blob/main/QuickStart.md
 
 ### Methods
 https://github.com/daveskura/mysqldave/blob/main/methods.md
+
+### Links
+https://stackoverflow.com/questions/13148630/how-do-i-find-which-transaction-is-causing-a-waiting-for-table-metadata-lock-s
