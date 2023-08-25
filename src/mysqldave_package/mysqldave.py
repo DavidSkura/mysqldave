@@ -17,26 +17,17 @@ def main():
 	mydb = mysql_db()
 	#mydb.connect()
 	#print(mydb.dbstr())
-	DB_USERNAME = 'dbadmin'
-	DB_USERPWD = 'Na$d0m!23'
-	DB_HOST='10.100.12.99'
-	DB_PORT='3355'
+	DB_USERNAME = 'dave'
+	DB_USERPWD = '4165605869'
+	DB_HOST='localhost'
+	DB_PORT='3306'
 	DB_NAME = ''
 
 	conn = mydb.useConnectionDetails(DB_USERNAME,DB_USERPWD,DB_HOST,DB_PORT,DB_NAME)
 
-	data = mydb.query("""
-		SELECT
-				(@row_number:=@row_number + 1) AS row_num
-				,L.*
-		FROM (
-				SELECT DISTINCT table_schema FROM INFORMATION_SCHEMA.TABLES
-				WHERE table_schema not in ('performance_schema','sys','information_schema')
-				) L,
-				(SELECT @row_number := 0) x
-		ORDER BY table_schema;
-		""")
-	print(data)
+	data = mydb.execute("INSERT INTO atlas.test_table(name,age) values ('dave',50)")
+	print(mydb.cur.rowcount)
+
 	mydb.close()
 
 
